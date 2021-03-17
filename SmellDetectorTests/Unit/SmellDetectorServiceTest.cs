@@ -6,12 +6,48 @@ using SmellDetector.SmellModel.Reports;
 using System.Linq;
 using Xunit;
 using Shouldly;
+using SmellDetector.Communication;
+using SmellDetectorTests.DataFactory;
 using System.Collections.Generic;
 
 namespace SmellDetectorTests.Unit
 {
     public class SmellDetectorServiceTest
     {
+
+        [Fact]
+        public void Generate_Smell_Detection_Report_For_LongMethod_And_Long_Parameter_List_Issues()
+        {
+            DetectionService detectionService = new DetectionService();
+            CaDETClassDTOFactory classFactory = new CaDETClassDTOFactory();
+
+            classFactory.CreateIssuesLongMethodAndLongParameterList();
+            var report = detectionService.GenerateSmellDetectionReport(classFactory.CaDETClassDTO);
+            report.Report[classFactory.TestIdentifier].Count().ShouldBe(classFactory.ExpectedIssues);
+        }
+
+        [Fact]
+        public void Generate_Smell_Detection_Report_For_LongMethod_Issue()
+        {
+            DetectionService detectionService = new DetectionService();
+            CaDETClassDTOFactory classFactory = new CaDETClassDTOFactory();
+
+            classFactory.CreateIssueLongMethod();
+            var report = detectionService.GenerateSmellDetectionReport(classFactory.CaDETClassDTO);
+            report.Report[classFactory.TestIdentifier].Count().ShouldBe(classFactory.ExpectedIssues);
+        }
+
+        [Fact]
+        public void Generate_Smell_Detection_Report_For_Another_LongMethod_Issue()
+        {
+            DetectionService detectionService = new DetectionService();
+            CaDETClassDTOFactory classFactory = new CaDETClassDTOFactory();
+
+            classFactory.CreateAnotherIssueLongMethod();
+            var report = detectionService.GenerateSmellDetectionReport(classFactory.CaDETClassDTO);
+            report.Report[classFactory.TestIdentifier].Count().ShouldBe(classFactory.ExpectedIssues);
+        }
+
         [Theory]
         [MemberData(nameof(Data))]
         public void Generate_Smell_Detection_Report(String testIdentifier, MetricsDTO metricsForIdentifier, int expectedIssues)
@@ -27,6 +63,7 @@ namespace SmellDetectorTests.Unit
             else{
                 report.Report.Count().ShouldBe(expectedIssues);
             }
+
         }
 
         public static IEnumerable<object[]> Data()
@@ -43,6 +80,5 @@ namespace SmellDetectorTests.Unit
             
             return retVal;
         }
-
     }
 }

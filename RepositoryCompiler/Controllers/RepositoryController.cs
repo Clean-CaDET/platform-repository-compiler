@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RepositoryCompiler.CodeModel.CaDETModel.CodeItems;
+using RepositoryCompiler.Communication;
 using RepositoryCompiler.Controllers.DTOs;
+using System;
 
 namespace RepositoryCompiler.Controllers
 {
@@ -28,11 +30,49 @@ namespace RepositoryCompiler.Controllers
             CaDETClass parsedClass = _repositoryService.BuildClassModel(classCode[0]);
             var metrics = new ClassMetricsDTO(parsedClass);
             EducationalContentDTO content = DetermineSuitableContent(parsedClass);
+
+            MessageProducer producer = new MessageProducer();
+            CaDETClassDTO reportMessage = CreateMockupMetricsReportMessage();
+            producer.CreateNewMetricsReport(reportMessage);
+
             return new ClassQualityAnalysisResponse
             {
+                Id = Guid.NewGuid(),
                 Content = content,
                 Metrics = metrics
             };
+        }
+
+        // TODO: Delete Mockup
+        public CaDETClassDTO CreateMockupMetricsReportMessage()
+        {
+            CaDETClassDTO report = new CaDETClassDTO();
+
+            string exampleMethodId = "public void SavePerson(Person person);";
+
+            MetricsDTO metrics = new MetricsDTO();
+            metrics.LOC = 1000;
+            metrics.NOLV = 100;
+            metrics.NOP = 1;
+
+            report.CodeItemMetrics[exampleMethodId] = metrics;
+
+            return report;
+        }
+
+        // TODO: Add GUID for return type here !
+        [HttpPost("process/class")]
+        public void ActivateProcessOfClassParsing([FromBody] string classCode)
+        {
+            CaDETClass parsedClass = _repositoryService.BuildClassModel(classCode);
+            CreateMetricsReport(parsedClass);
+        }
+
+        private void CreateMetricsReport(CaDETClass parsedClass)
+        {
+            MessageProducer producer = new MessageProducer();
+            CaDETClassDTO reportMessage = new CaDETClassDTO(parsedClass);
+            producer.CreateNewMetricsReport(reportMessage);
         }
 
         private EducationalContentDTO DetermineSuitableContent(CaDETClass parsedClass)
