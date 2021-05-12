@@ -28,11 +28,17 @@ namespace SmartTutor.Controllers
             return lectures.Select(l => _mapper.Map<LectureDTO>(l)).ToList();
         }
 
-        [HttpGet]
+        [HttpGet("test")]
         [Authorize(Policy = "testPolicy")]
         public ActionResult<string> Test()
         {
             return "Success";
+        }
+
+        [HttpGet("test2")]
+        public ActionResult<string> Test2()
+        {
+            return "Success2";
         }
     }
 }
