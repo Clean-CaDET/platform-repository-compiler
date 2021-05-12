@@ -4,6 +4,7 @@ using SmartTutor.ContentModel;
 using SmartTutor.Controllers.DTOs.Content;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SmartTutor.Controllers
 {
@@ -25,6 +26,13 @@ namespace SmartTutor.Controllers
         {
             var lectures = _contentService.GetLectures();
             return lectures.Select(l => _mapper.Map<LectureDTO>(l)).ToList();
+        }
+
+        [HttpGet]
+        [Authorize(Policy = "testPolicy")]
+        public ActionResult<string> Test()
+        {
+            return "Success";
         }
     }
 }
