@@ -93,7 +93,7 @@ namespace SmartTutor
             {
                 options.Authority = Environment.GetEnvironmentVariable("AUTHORITY") ?? "http://localhost:8080/auth/realms/master";
                 options.Audience = Environment.GetEnvironmentVariable("AUDIENCE") ?? "demo-app";
-                // options.RequireHttpsMetadata = false;
+                options.RequireHttpsMetadata = false;
                 options.SaveToken = true;
                 options.Events = new JwtBearerEvents
 
