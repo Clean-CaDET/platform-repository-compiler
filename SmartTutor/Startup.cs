@@ -22,6 +22,7 @@ using SmartTutor.ProgressModel.Feedback.Repository;
 using SmartTutor.ProgressModel.Progress.Repository;
 using SmartTutor.ProgressModel.Submissions.Repository;
 using System;
+using Microsoft.IdentityModel.Logging;
 
 namespace SmartTutor
 {
@@ -44,6 +45,8 @@ namespace SmartTutor
             {
                 options.JsonSerializerOptions.Converters.Add(new LearningObjectJsonConverter());
             });
+            
+            IdentityModelEventSource.ShowPII = true; 
 
             services.AddDbContext<SmartTutorContext>(opt =>
                 opt.UseNpgsql(CreateConnectionStringFromEnvironment()));
@@ -90,7 +93,7 @@ namespace SmartTutor
             {
                 options.Authority = Environment.GetEnvironmentVariable("AUTHORITY") ?? "http://localhost:8080/auth/realms/master";
                 options.Audience = Environment.GetEnvironmentVariable("AUDIENCE") ?? "demo-app";
-                options.RequireHttpsMetadata = false;
+                // options.RequireHttpsMetadata = false;
                 options.SaveToken = true;
                 options.Events = new JwtBearerEvents
 
