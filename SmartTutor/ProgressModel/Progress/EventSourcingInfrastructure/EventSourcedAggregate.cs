@@ -12,6 +12,6 @@ namespace SmartTutor.ProgressModel.Progress.EventSourcingInfrastructure
             Changes = new List<DomainEvent>();
         }
 
-        public abstract void Apply(DomainEvent change);
+        public abstract void Apply(DomainEvent @event);
     }
 }
