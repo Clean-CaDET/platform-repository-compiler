@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace CodeModel.CaDETModel.CodeItems
@@ -74,6 +75,42 @@ namespace CodeModel.CaDETModel.CodeItems
                 }
             }
             return accessedOwnAccessors;
+        }
+
+        public List<CaDETField> GetDirectlyAndIndirectlyAccessedOwnFields()
+        {
+            HashSet<CaDETMember> members = new HashSet<CaDETMember>(){this};
+
+            return FindAccessedOwnFields(members).ToList();
+        }
+
+        private HashSet<CaDETField> FindAccessedOwnFields(HashSet<CaDETMember> members)
+        {
+            HashSet<CaDETField> fields =  GetAccessedOwnFields().ToHashSet();
+            foreach (var method in InvokedMethods.Where(m => m.Parent.Equals(Parent)))
+            {
+                if (members.Contains(method)) continue;
+
+                HashSet<CaDETField> foundFields = method.FindAccessedOwnFields(members);
+                fields.UnionWith(foundFields);
+                members.Add(method);
+            }
+
+            return fields;
+        }
+
+        /// <summary>
+        /// Member is normal method if it's neither constructor, nor getter or setter,
+        /// nor delegate function. TODO accesses multiple fields
+        /// </summary>
+        public bool IsMemberNormalMethod()
+        {
+            return Type == CaDETMemberType.Method && Metrics[CaDETMetric.MELOC] > 1 && IsMemberPublic();
+        }
+
+        private bool IsMemberPublic()
+        {
+            return Modifiers.Exists(md => md.Value == CaDETModifierValue.Public);
         }
 
         public override bool Equals(object other)

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using CodeModel.CodeParsers.CSharp.ICMBC;
 
 namespace CodeModel.CodeParsers.CSharp
 {
@@ -30,6 +31,7 @@ namespace CodeModel.CodeParsers.CSharp
                 [CaDETMetric.CMNB] = CountMaxNestedBlocks(parsedClass),
                 [CaDETMetric.RFC] = CountUniqueMethodInvocations(parsedClass),
                 [CaDETMetric.CBO] = CountDependencies(parsedClass),
+                [CaDETMetric.ICBMC] = GetICBMCCohesionValue(parsedClass)
             };
         }
         public int GetLinesOfCode(string code)
@@ -199,6 +201,12 @@ namespace CodeModel.CodeParsers.CSharp
             allDependencies.AddRange(parsedClass.GetMethodLinkedVariableTypes().Distinct());
             var uniqueDependencies = allDependencies.GroupBy(d => d.FullName).Select(d => d.First());
             return uniqueDependencies.Count();
+        }
+
+        private double GetICBMCCohesionValue(CaDETClass parsedClass)
+        {
+            ICBMCGraph icbmcGraph = new ICBMCGraph(parsedClass);
+            return icbmcGraph.Calculate();
         }
     }
 }
