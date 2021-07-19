@@ -24,6 +24,7 @@ using SmartTutor.ProgressModel.Submissions.Repository;
 using SmartTutor.QualityAnalysis;
 using SmartTutor.QualityAnalysis.Repository;
 using System;
+using Microsoft.Net.Http.Headers;
 
 namespace SmartTutor
 {
@@ -38,6 +39,8 @@ namespace SmartTutor
         public IConfiguration Configuration { get; }
         public IWebHostEnvironment Env { get; }
 
+        readonly string CorsPolicy = "_corsPolicy";
+
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddAutoMapper(typeof(Startup));
@@ -45,6 +48,17 @@ namespace SmartTutor
             services.AddControllers().AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.Converters.Add(new LearningObjectJsonConverter());
+            });
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy(name: CorsPolicy,
+                    builder =>
+                    {
+                        builder.WithOrigins("http://localhost:4200")
+                            .WithHeaders(HeaderNames.ContentType, HeaderNames.Authorization, "access_token")
+                            .WithMethods("GET", "PUT", "POST", "DELETE", "OPTIONS");
+                    });
             });
 
             services.AddDbContext<SmartTutorContext>(opt =>
@@ -110,6 +124,7 @@ namespace SmartTutor
                         {
                             return failedContext.Response.WriteAsync(failedContext.Exception.ToString());
                         }
+
                         return failedContext.Response.WriteAsync("An error occured processing your authentication.");
                     }
                 };
@@ -123,11 +138,13 @@ namespace SmartTutor
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseCors(x => x
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                .SetIsOriginAllowed(origin => true) // allow any origin
-                .AllowCredentials()); // allow credentials
+            // app.UseCors(x => x
+            //     .AllowAnyMethod()
+            //     .AllowAnyHeader()
+            //     .SetIsOriginAllowed(origin => true) // allow any origin
+            //     .AllowCredentials()); // allow credentials
+
+            app.UseCors(CorsPolicy);
 
             app.UseHttpsRedirection();
 
